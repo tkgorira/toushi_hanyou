@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}保有銘柄一覧 - 投資管理{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>保有銘柄一覧</h1>
+  <a href="{{ url_for('holding_add') }}" class="btn btn--primary">＋ 銘柄を追加</a>
+</div>
+
+{% if rows %}
+<div class="table-wrapper">
+  <table class="holdings-table">
+    <thead>
+      <tr>
+        <th>Ticker</th>
+        <th>銘柄名</th>
+        <th class="num">保有数</th>
+        <th class="num">平均取得単価</th>
+        <th class="num">現在価格</th>
+        <th class="num">評価額</th>
+        <th class="num">損益額</th>
+        <th class="num">損益率</th>
+        <th>通貨</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td class="ticker">{{ row.ticker }}</td>
+        <td>{{ row.name }}</td>
+        <td class="num">{{ row.quantity }}</td>
+        <td class="num">{{ row.average_cost_display }}</td>
+        <td class="num {% if row.price is none %}text--error{% endif %}">
+          {% if row.price is none %}
+            取得失敗
+          {% else %}
+            {{ row.price_display }}
+          {% endif %}
+        </td>
+        <td class="num">{{ row.market_value_display }}</td>
+        <td class="num pnl pnl--{{ row.pnl_sign }}">{{ row.pnl_display }}</td>
+        <td class="num pnl pnl--{{ row.pnl_sign }}">{{ row.pnl_pct_display }}</td>
+        <td>{{ row.currency }}</td>
+        <td class="actions">
+          <a href="{{ url_for('holding_edit', holding_id=row.id) }}" class="btn btn--small">編集</a>
+          <form action="{{ url_for('holding_delete', holding_id=row.id) }}" method="post"
+                onsubmit="return confirm('{{ row.ticker }} を削除しますか？')">
+            <button type="submit" class="btn btn--small btn--danger">削除</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <p>保有銘柄がまだ登録されていません。</p>
+  <a href="{{ url_for('holding_add') }}" class="btn btn--primary">最初の銘柄を追加する</a>
+</div>
+{% endif %}
+
+<p class="note">※ 現在価格は一覧表示時に yfinance から取得します。</p>
+{% endblock %}

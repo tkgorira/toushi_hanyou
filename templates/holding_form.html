@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{% if action == 'edit' %}銘柄を編集{% else %}銘柄を追加{% endif %} - 投資管理{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{% if action == 'edit' %}銘柄を編集{% else %}銘柄を追加{% endif %}</h1>
+  <a href="{{ url_for('index') }}" class="btn btn--secondary">← 一覧に戻る</a>
+</div>
+
+<form class="holding-form"
+      method="post"
+      action="{{ url_for('holding_edit', holding_id=holding.id) if action == 'edit' else url_for('holding_add') }}">
+
+  <div class="form-group">
+    <label for="ticker">Ticker <span class="required">*</span></label>
+    <input type="text" id="ticker" name="ticker" required
+           placeholder="例: AAPL, MSFT, 7203.T"
+           value="{{ holding.ticker if holding else '' }}" />
+    <small>米国株はそのまま入力（AAPL）。日本株は 7203.T のように末尾に .T を付けてください。</small>
+  </div>
+
+  <div class="form-group">
+    <label for="name">銘柄名</label>
+    <input type="text" id="name" name="name"
+           placeholder="例: Apple Inc.（空欄の場合は自動取得を試みます）"
+           value="{{ holding.name if holding and holding.name else '' }}" />
+  </div>
+
+  <div class="form-group">
+    <label for="market">市場</label>
+    <select id="market" name="market">
+      <option value="">-- 選択してください --</option>
+      {% for val, label in [('US', '米国株'), ('JP', '日本株'), ('OTHER', 'その他')] %}
+        <option value="{{ val }}"
+          {% if holding and holding.market == val %}selected{% endif %}>
+          {{ label }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="quantity">保有数 <span class="required">*</span></label>
+      <input type="number" id="quantity" name="quantity" required
+             step="0.0001" min="0"
+             placeholder="例: 10"
+             value="{{ holding.quantity if holding else '' }}" />
+    </div>
+
+    <div class="form-group">
+      <label for="average_cost">平均取得単価 <span class="required">*</span></label>
+      <input type="number" id="average_cost" name="average_cost" required
+             step="0.0001" min="0"
+             placeholder="例: 150.00"
+             value="{{ holding.average_cost if holding else '' }}" />
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="currency">通貨 <span class="required">*</span></label>
+    <select id="currency" name="currency" required>
+      {% for val, label in [('USD', 'USD（米ドル）'), ('JPY', 'JPY（日本円）'), ('EUR', 'EUR（ユーロ）')] %}
+        <option value="{{ val }}"
+          {% if holding and holding.currency == val %}selected
+          {% elif not holding and val == 'USD' %}selected{% endif %}>
+          {{ label }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="memo">メモ</label>
+    <input type="text" id="memo" name="memo"
+           placeholder="例: NISA成長投資枠、特定口座 など"
+           value="{{ holding.memo if holding and holding.memo else '' }}" />
+    <small>口座区分や購入理由など、自由にメモできます。</small>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn--primary">
+      {% if action == 'edit' %}更新する{% else %}追加する{% endif %}
+    </button>
+    <a href="{{ url_for('index') }}" class="btn btn--secondary">キャンセル</a>
+  </div>
+</form>
+{% endblock %}
