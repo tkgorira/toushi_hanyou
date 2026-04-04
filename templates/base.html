@@ -8,8 +8,17 @@
 </head>
 <body>
   <header class="site-header">
-    <div class="container">
+    <div class="container header-inner">
       <a href="{{ url_for('index') }}" class="site-title">📈 投資管理</a>
+      <div class="fx-rate">
+        {% if usdjpy is defined and usdjpy %}
+          <span class="fx-label">USD/JPY</span>
+          <span class="fx-value">{{ "%.2f" | format(usdjpy) }}</span>
+          <span class="fx-unit">円</span>
+        {% else %}
+          <span class="fx-error">USD/JPY 取得失敗</span>
+        {% endif %}
+      </div>
     </div>
   </header>
 
@@ -32,5 +41,11 @@
       <small>toushi_hanyou MVP</small>
     </div>
   </footer>
+  <script>
+    // bfcache（ブラウザの戻る/進むキャッシュ）から復元された場合は強制リロード
+    window.addEventListener('pageshow', function(e) {
+      if (e.persisted) { window.location.reload(); }
+    });
+  </script>
 </body>
 </html>

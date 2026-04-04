@@ -24,3 +24,25 @@ class Holding(db.Model):
 
     def __repr__(self):
         return f"<Holding {self.ticker} qty={self.quantity}>"
+
+
+class Setting(db.Model):
+    """アプリ設定をキーバリューで保持する。"""
+    __tablename__ = "settings"
+
+    key = db.Column(db.String(50), primary_key=True)
+    value = db.Column(db.String(200), nullable=False)
+
+    @staticmethod
+    def get(key: str, default=None):
+        row = Setting.query.get(key)
+        return row.value if row else default
+
+    @staticmethod
+    def set(key: str, value: str):
+        row = Setting.query.get(key)
+        if row:
+            row.value = value
+        else:
+            db.session.add(Setting(key=key, value=value))
+        db.session.commit()

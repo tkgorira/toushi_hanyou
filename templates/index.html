@@ -2,6 +2,29 @@
 {% block title %}保有銘柄一覧 - 投資管理{% endblock %}
 
 {% block content %}
+
+{# ── 月次目標設定パネル ── #}
+<div class="goal-panel">
+  <form class="goal-form" action="{{ url_for('settings_goal') }}" method="post">
+    <span class="goal-label">月次配当目標</span>
+    <input type="number" name="monthly_goal" min="0" step="1"
+           placeholder="例: 50000"
+           value="{{ monthly_goal | int if monthly_goal else '' }}" />
+    <select name="monthly_goal_currency">
+      {% for val, label in [('JPY','JPY（円）'), ('USD','USD（ドル）')] %}
+        <option value="{{ val }}" {% if monthly_goal_currency == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn--primary btn--small">保存</button>
+    {% if monthly_goal %}
+      <span class="goal-current">
+        現在の目標: <strong>{{ "{:,.0f}".format(monthly_goal) }} {{ monthly_goal_currency }} / 月</strong>
+      </span>
+    {% endif %}
+  </form>
+</div>
+
+{# ── ヘッダー ── #}
 <div class="page-header">
   <h1>保有銘柄一覧</h1>
   <a href="{{ url_for('holding_add') }}" class="btn btn--primary">＋ 銘柄を追加</a>
@@ -12,16 +35,29 @@
   <table class="holdings-table">
     <thead>
       <tr>
-        <th>Ticker</th>
-        <th>銘柄名</th>
-        <th class="num">保有数</th>
-        <th class="num">平均取得単価</th>
-        <th class="num">現在価格</th>
-        <th class="num">評価額</th>
-        <th class="num">損益額</th>
-        <th class="num">損益率</th>
-        <th>通貨</th>
-        <th>操作</th>
+        <th rowspan="2">Ticker</th>
+        <th rowspan="2">銘柄名</th>
+        <th rowspan="2" class="num">保有数</th>
+        <th rowspan="2" class="num">平均取得単価</th>
+        <th rowspan="2" class="num">現在価格</th>
+        <th rowspan="2" class="num">評価額</th>
+        <th rowspan="2" class="num">損益額</th>
+        <th rowspan="2" class="num">損益率</th>
+        <th colspan="4" class="group-header">配当情報</th>
+        {% if monthly_goal %}
+        <th class="group-header">目標達成（{{ monthly_goal_currency }}/月）</th>
+        {% endif %}
+        <th rowspan="2">通貨</th>
+        <th rowspan="2">操作</th>
+      </tr>
+      <tr>
+        <th class="num sub">年間配当/株</th>
+        <th class="num sub">直近1回</th>
+        <th class="num sub">年間回数</th>
+        <th class="num sub">配当利回り</th>
+        {% if monthly_goal %}
+        <th class="num sub">買い増し株数</th>
+        {% endif %}
       </tr>
     </thead>
     <tbody>
@@ -32,15 +68,37 @@
         <td class="num">{{ row.quantity }}</td>
         <td class="num">{{ row.average_cost_display }}</td>
         <td class="num {% if row.price is none %}text--error{% endif %}">
-          {% if row.price is none %}
-            取得失敗
-          {% else %}
-            {{ row.price_display }}
-          {% endif %}
+          {% if row.price is none %}取得失敗{% else %}{{ row.price_display }}{% endif %}
         </td>
         <td class="num">{{ row.market_value_display }}</td>
         <td class="num pnl pnl--{{ row.pnl_sign }}">{{ row.pnl_display }}</td>
         <td class="num pnl pnl--{{ row.pnl_sign }}">{{ row.pnl_pct_display }}</td>
+
+        {# 配当情報 #}
+        <td class="num">{{ row.annual_dividend_display }}</td>
+        <td class="num div-detail">
+          {{ row.per_payment_display }}
+          {% if row.payments %}
+            <span class="tooltip-icon" tabindex="0">▼
+              <span class="tooltip">
+                {% for p in row.payments %}
+                  {{ p.date }}: {{ "%.4f" | format(p.amount) }}<br>
+                {% endfor %}
+              </span>
+            </span>
+          {% endif %}
+        </td>
+        <td class="num">{{ row.frequency if row.frequency else '---' }}</td>
+        <td class="num">{{ row.div_yield_display }}</td>
+
+        {# 目標達成 #}
+        {% if monthly_goal %}
+        <td class="num {% if row.goal_achieved %}text--achieved{% else %}text--shortage{% endif %}">
+          {{ row.shares_to_add_display }}
+          {% if row.fx_converted %}<span class="fx-badge" title="USD/JPY換算済">FX</span>{% endif %}
+        </td>
+        {% endif %}
+
         <td>{{ row.currency }}</td>
         <td class="actions">
           <a href="{{ url_for('holding_edit', holding_id=row.id) }}" class="btn btn--small">編集</a>
@@ -61,5 +119,6 @@
 </div>
 {% endif %}
 
-<p class="note">※ 現在価格は一覧表示時に yfinance から取得します。</p>
+<p class="note">※ 価格・配当は一覧表示時に Yahoo Finance から取得します。直近配当の ▼ で各回の履歴を確認できます。</p>
+<p class="note">※ 必要株数・追加必要数は「このティッカー単独で月次目標を達成するのに必要な株数」です。</p>
 {% endblock %}
