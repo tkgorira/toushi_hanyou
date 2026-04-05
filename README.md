@@ -5,6 +5,7 @@ Flask + SQLite + yfinance で動く、シンプルな株式保有管理アプリ
 ## 機能
 
 - 保有銘柄の追加 / 編集 / 削除
+- 単一ユーザー向けログイン保護
 - yfinance による現在価格の自動取得（一覧表示時）
 - 評価額・損益額・損益率の自動計算
 - 価格取得失敗時のエラー表示（画面崩壊なし）
@@ -100,6 +101,27 @@ _provider = FinnhubProvider()
 5. 環境変数を設定
     - `SECRET_KEY`（必須）
     - `DATABASE_URL`（PostgreSQL の接続文字列）
+    - `AUTH_USERNAME`（ログインユーザー名）
+    - `AUTH_PASSWORD`（ログインパスワード）
+
+## ログイン保護
+
+未ログイン時は `/login` にリダイレクトされ、ログイン後に一覧や編集機能へアクセスできます。
+
+### 必須環境変数
+
+- `AUTH_USERNAME`
+- `AUTH_PASSWORD`
+
+Render では Web Service の Environment で上記を追加してください。
+
+### パスワードをハッシュで管理したい場合
+
+`AUTH_PASSWORD` の代わりに `AUTH_PASSWORD_HASH` を設定できます。
+
+```bash
+python -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('your-password'))"
+```
 
 ### 既存SQLiteデータを移したい場合
 

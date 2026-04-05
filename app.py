@@ -1,8 +1,9 @@
 import math
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from datetime import datetime, timezone
 from sqlalchemy import text
+from werkzeug.security import check_password_hash
 
 from config import Config
 from models import db, Holding, Setting
@@ -12,6 +13,30 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 db.init_app(app)
+
+
+def _is_authenticated() -> bool:
+    return session.get("authenticated") is True
+
+
+def _verify_login(username: str, password: str) -> bool:
+    if username != app.config["AUTH_USERNAME"]:
+        return False
+    plain = app.config.get("AUTH_PASSWORD")
+    if plain:
+        return password == plain
+    return check_password_hash(app.config["AUTH_PASSWORD_HASH"], password)
+
+
+@app.before_request
+def require_login():
+    if request.endpoint in {"login", "static"}:
+        return
+    if request.endpoint is None:
+        return
+    if _is_authenticated():
+        return
+    return redirect(url_for("login", next=request.path))
 
 
 def _ensure_schema_columns():
@@ -198,6 +223,33 @@ def _optimize_buy_combination(enriched: list[dict], annual_shortfall: float) -> 
 
 
 # ── ルーティング ──────────────────────────────────────────
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if _is_authenticated():
+        return redirect(url_for("index"), 303)
+
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        if _verify_login(username, password):
+            session["authenticated"] = True
+            session["username"] = username
+            flash("ログインしました。", "success")
+            next_path = request.args.get("next")
+            if next_path and next_path.startswith("/"):
+                return redirect(next_path, 303)
+            return redirect(url_for("index"), 303)
+        flash("ユーザー名またはパスワードが違います。", "error")
+
+    return render_template("login.html")
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    flash("ログアウトしました。", "success")
+    return redirect(url_for("login"), 303)
 
 @app.route("/")
 def index():

@@ -1,6 +1,9 @@
 import os
+from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+load_dotenv()
 
 
 def _normalize_postgres_driver(database_url: str) -> str:
@@ -33,3 +36,8 @@ class Config:
     }
     # 価格プロバイダー切り替え用 ("yfinance" | "finnhub" | "alphavantage")
     PRICE_PROVIDER = os.environ.get("PRICE_PROVIDER", "yfinance")
+
+    # シンプルな単一ユーザー認証設定
+    AUTH_USERNAME = os.environ.get("AUTH_USERNAME", "admin")
+    AUTH_PASSWORD = os.environ.get("AUTH_PASSWORD")
+    AUTH_PASSWORD_HASH = os.environ.get("AUTH_PASSWORD_HASH") or generate_password_hash("change-me")

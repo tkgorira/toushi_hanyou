@@ -10,13 +10,20 @@
   <header class="site-header">
     <div class="container header-inner">
       <a href="{{ url_for('index') }}" class="site-title">📈 投資管理</a>
-      <div class="fx-rate">
-        {% if usdjpy is defined and usdjpy %}
-          <span class="fx-label">USD/JPY</span>
-          <span class="fx-value">{{ "%.2f" | format(usdjpy) }}</span>
-          <span class="fx-unit">円</span>
-        {% else %}
-          <span class="fx-error">USD/JPY 取得失敗</span>
+      <div class="header-right">
+        <div class="fx-rate">
+          {% if usdjpy is defined and usdjpy %}
+            <span class="fx-label">USD/JPY</span>
+            <span class="fx-value">{{ "%.2f" | format(usdjpy) }}</span>
+            <span class="fx-unit">円</span>
+          {% else %}
+            <span class="fx-error">USD/JPY 取得失敗</span>
+          {% endif %}
+        </div>
+        {% if session.get('authenticated') %}
+          <form method="post" action="{{ url_for('logout') }}">
+            <button type="submit" class="btn btn--small btn--secondary">ログアウト</button>
+          </form>
         {% endif %}
       </div>
     </div>

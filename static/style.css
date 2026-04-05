@@ -47,6 +47,11 @@ a:hover { text-decoration: underline; }
   box-shadow: var(--shadow);
 }
 .header-inner { display: flex; align-items: center; justify-content: space-between; }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .site-title { font-size: 18px; font-weight: 700; color: var(--color-text); }
 .site-title:hover { text-decoration: none; }
 
@@ -353,6 +358,7 @@ label {
 
 input[type="text"],
 input[type="number"],
+input[type="password"],
 select {
   width: 100%;
   padding: 8px 12px;
