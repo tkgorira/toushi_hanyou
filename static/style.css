@@ -410,6 +410,17 @@ main.container { padding-top: 24px; padding-bottom: 40px; }
   .holding-form { padding: 16px; }
   .header-inner { align-items: flex-start; }
   .header-right { flex-direction: column; align-items: flex-end; }
+  .recommendation-table th,
+  .recommendation-table td {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+  .recommendation-table .rec-name {
+    max-width: 90px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }
 
 label {
