@@ -1,6 +1,6 @@
 import math
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
 from datetime import datetime, timezone
 from sqlalchemy import text
 from werkzeug.security import check_password_hash
@@ -250,6 +250,11 @@ def logout():
     session.clear()
     flash("ログアウトしました。", "success")
     return redirect(url_for("login"), 303)
+
+
+@app.route("/apple-touch-icon.png")
+def apple_touch_icon():
+    return send_from_directory(app.static_folder, "apple-touch-icon.png", mimetype="image/png")
 
 @app.route("/")
 def index():
