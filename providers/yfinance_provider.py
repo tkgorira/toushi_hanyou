@@ -55,7 +55,13 @@ def _parse_dividends(chart: dict) -> dict:
         "frequency": int | None,
     }
     """
-    empty = {"annual_dividend": None, "per_payment": None, "payments": [], "frequency": None}
+    empty = {
+        "annual_dividend": None,
+        "per_payment": None,
+        "payments": [],
+        "payments_last_year": [],
+        "frequency": None,
+    }
     raw_divs = chart.get("events", {}).get("dividends", {})
     if not raw_divs:
         return empty
@@ -81,6 +87,7 @@ def _parse_dividends(chart: dict) -> dict:
         "annual_dividend": annual_dividend,
         "per_payment": all_payments[0]["amount"] if all_payments else None,
         "payments": all_payments[:4],
+        "payments_last_year": last_year,
         "frequency": frequency,
     }
 
@@ -96,7 +103,7 @@ class YfinanceProvider:
             return {
                 "price": None, "name": None,
                 "annual_dividend": None, "per_payment": None,
-                "payments": [], "frequency": None,
+                "payments": [], "payments_last_year": [], "frequency": None,
             }
 
         meta = chart["meta"]

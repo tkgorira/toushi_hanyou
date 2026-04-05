@@ -89,6 +89,20 @@ main.container { padding-top: 24px; padding-bottom: 40px; }
   gap: 12px;
 }
 .page-header h1 { font-size: 22px; font-weight: 700; }
+.edit-target {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 14px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
 
 /* ── Buttons ── */
 .btn {
@@ -109,6 +123,7 @@ main.container { padding-top: 24px; padding-bottom: 40px; }
 .btn--danger   { background: var(--color-danger); color: #fff; }
 .btn--danger:hover { background: var(--color-danger-hover); }
 .btn--small    { padding: 4px 10px; font-size: 12px; }
+.btn--tiny     { padding: 2px 8px; font-size: 11px; line-height: 1.2; }
 
 /* ── Table ── */
 .table-wrapper { overflow-x: auto; }
@@ -143,6 +158,13 @@ main.container { padding-top: 24px; padding-bottom: 40px; }
 .holdings-table td.num { text-align: right; }
 
 .ticker { font-family: monospace; font-weight: 700; font-size: 15px; }
+.ticker-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.2;
+}
+.ticker-edit-btn { margin-bottom: 4px; }
 
 /* ── PnL colors ── */
 .pnl--positive { color: var(--color-positive); font-weight: 600; }
@@ -167,6 +189,58 @@ main.container { padding-top: 24px; padding-bottom: 40px; }
 
 /* ── Note ── */
 .note { margin-top: 8px; font-size: 12px; color: var(--color-text-muted); }
+
+/* ── Recommendation band ── */
+.recommend-band-wrap {
+  margin-top: 16px;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, #eff6ff, #f8fafc);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.recommend-band-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e3a8a;
+  padding: 8px 12px;
+  border-bottom: 1px solid #dbeafe;
+  background: #dbeafe;
+}
+.recommend-band {
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 8px 0;
+}
+.recommend-track {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: max-content;
+  min-width: 200%;
+  will-change: transform;
+  animation: recommend-scroll 36s linear infinite;
+}
+.recommend-band:hover .recommend-track { animation-play-state: paused; }
+.recommend-item {
+  display: inline-block;
+  font-size: 12px;
+  color: #1f2937;
+  padding: 0 2px;
+}
+.recommend-item:first-child {
+  font-weight: 700;
+  color: #1e3a8a;
+}
+.recommend-item::after {
+  content: "•";
+  color: #60a5fa;
+  margin-left: 16px;
+}
+@keyframes recommend-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
 
 /* ── Goal panel ── */
 .goal-panel {

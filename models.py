@@ -14,6 +14,7 @@ class Holding(db.Model):
     quantity = db.Column(db.Float, nullable=False)
     average_cost = db.Column(db.Float, nullable=False)
     currency = db.Column(db.String(10), nullable=False, default="USD")
+    account_type = db.Column(db.String(20), nullable=False, default="TOKUTEI")
     memo = db.Column(db.Text, nullable=True)                  # 口座区分など将来用
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(

@@ -20,9 +20,62 @@
       <span class="goal-current">
         現在の目標: <strong>{{ "{:,.0f}".format(monthly_goal) }} {{ monthly_goal_currency }} / 月</strong>
       </span>
+      <span class="goal-current">
+        現在配当: <strong>{{ "{:,.0f}".format(monthly_dividend_current) }} {{ monthly_goal_currency }} / 月</strong>
+        （年 {{ "{:,.0f}".format(annual_dividend_current) }} {{ monthly_goal_currency }}）
+      </span>
+      {% if monthly_dividend_breakdown %}
+      <span class="goal-current">
+        各月合計:
+        {% for item in monthly_dividend_breakdown %}
+          {{ item.month }}月{{ "{:,.0f}".format(item.amount) }}{{ monthly_goal_currency }}{% if not loop.last %} / {% endif %}
+        {% endfor %}
+      </span>
+      {% endif %}
     {% endif %}
   </form>
 </div>
+
+{% if monthly_goal %}
+<div class="goal-panel">
+  <h3>目標達成に向けた買い増し組み合わせ（効率重視）</h3>
+  {% if annual_shortfall == 0 %}
+    <p>現在の配当で目標を達成しています。</p>
+  {% elif recommendation and recommendation.rows %}
+    <p>
+      不足分（年）: <strong>{{ "{:,.0f}".format(annual_shortfall) }} {{ monthly_goal_currency }}</strong>
+      / 推奨追加配当（年）: <strong>{{ "{:,.0f}".format(recommendation.total_annual_add) }} {{ monthly_goal_currency }}</strong>
+      / 必要買い増し額: <strong>{{ "{:,.0f}".format(recommendation.total_buy_jpy) }} 円</strong>
+    </p>
+    <div class="table-wrapper">
+      <table class="holdings-table">
+        <thead>
+          <tr>
+            <th>Ticker</th>
+            <th>銘柄名</th>
+            <th class="num">推奨買い増し株数</th>
+            <th class="num">追加配当（年）</th>
+            <th class="num">買い増し金額（円）</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rec in recommendation.rows %}
+          <tr>
+            <td class="ticker">{{ rec.ticker }}</td>
+            <td>{{ rec.name }}</td>
+            <td class="num">+{{ rec.shares }}株</td>
+            <td class="num">{{ "{:,.0f}".format(rec.annual_add) }} {{ monthly_goal_currency }}</td>
+            <td class="num">{{ "{:,.0f}".format(rec.buy_jpy) }} 円</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p>最適組み合わせを計算できませんでした（配当または価格データ不足）。</p>
+  {% endif %}
+</div>
+{% endif %}
 
 {# ── ヘッダー ── #}
 <div class="page-header">
@@ -45,25 +98,30 @@
         <th rowspan="2" class="num">損益率</th>
         <th colspan="4" class="group-header">配当情報</th>
         {% if monthly_goal %}
-        <th class="group-header">目標達成（{{ monthly_goal_currency }}/月）</th>
+        <th colspan="2" class="group-header">目標達成（{{ monthly_goal_currency }}/月）</th>
         {% endif %}
         <th rowspan="2">通貨</th>
-        <th rowspan="2">操作</th>
+        <th rowspan="2">削除</th>
       </tr>
       <tr>
-        <th class="num sub">年間配当/株</th>
+        <th class="num sub">年間受取配当/株</th>
         <th class="num sub">直近1回</th>
         <th class="num sub">年間回数</th>
         <th class="num sub">配当利回り</th>
         {% if monthly_goal %}
         <th class="num sub">買い増し株数</th>
+        <th class="num sub">買い増し金額（円）</th>
         {% endif %}
       </tr>
     </thead>
     <tbody>
       {% for row in rows %}
       <tr>
-        <td class="ticker">{{ row.ticker }}</td>
+        <td>
+          <a href="{{ url_for('holding_edit', holding_id=row.id) }}" class="btn btn--tiny btn--secondary ticker-edit-btn">編集</a>
+          <div class="ticker">{{ row.ticker }}</div>
+          <div class="ticker-sub">{{ row.account_type_display }}</div>
+        </td>
         <td>{{ row.name }}</td>
         <td class="num">{{ row.quantity }}</td>
         <td class="num">{{ row.average_cost_display }}</td>
@@ -97,11 +155,11 @@
           {{ row.shares_to_add_display }}
           {% if row.fx_converted %}<span class="fx-badge" title="USD/JPY換算済">FX</span>{% endif %}
         </td>
+        <td class="num">{{ row.buy_amount_to_add_display }}</td>
         {% endif %}
 
         <td>{{ row.currency }}</td>
         <td class="actions">
-          <a href="{{ url_for('holding_edit', holding_id=row.id) }}" class="btn btn--small">編集</a>
           <form action="{{ url_for('holding_delete', holding_id=row.id) }}" method="post"
                 onsubmit="return confirm('{{ row.ticker }} を削除しますか？')">
             <button type="submit" class="btn btn--small btn--danger">削除</button>
@@ -121,4 +179,22 @@
 
 <p class="note">※ 価格・配当は一覧表示時に Yahoo Finance から取得します。直近配当の ▼ で各回の履歴を確認できます。</p>
 <p class="note">※ 必要株数・追加必要数は「このティッカー単独で月次目標を達成するのに必要な株数」です。</p>
+
+{% if recommendation_feed %}
+<div class="recommend-band-wrap">
+  <div class="recommend-band-label">
+    配当が薄い月（{{ weak_months | join('・') }}月）を埋める候補（楽天証券オンリー / NISA想定）
+  </div>
+  <div class="recommend-band">
+    <div class="recommend-track">
+      {% for item in recommendation_feed %}
+        <span class="recommend-item">{{ item }}</span>
+      {% endfor %}
+      {% for item in recommendation_feed %}
+        <span class="recommend-item">{{ item }}</span>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endblock %}

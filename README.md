@@ -82,13 +82,35 @@ _provider = FinnhubProvider()
 
 ## Render へのデプロイ手順
 
-1. `requirements.txt` に `gunicorn` が含まれていることを確認
-2. Render で新規 Web Service を作成
+共有運用（スマホ / 会社 / 自宅）をする場合は、SQLite ではなく PostgreSQL を使ってください。
+
+### かんたん手順（render.yaml 使用）
+
+1. このリポジトリを GitHub に push
+2. Render の Blueprint でリポジトリを指定
+3. `render.yaml` が自動で Web Service + PostgreSQL を作成
+4. デプロイ完了後、発行された URL をスマホ・会社PC・自宅PCで開く
+
+### 手動で作る場合
+
+1. Render で PostgreSQL を作成
+2. Render で Web Service を作成
 3. Build Command: `pip install -r requirements.txt`
 4. Start Command: `gunicorn app:app`
-5. 環境変数 `SECRET_KEY` を設定（必須）
-6. SQLite は Render のエフェメラルストレージに保存される点に注意
-   （本番運用では PostgreSQL への移行を推奨）
+5. 環境変数を設定
+    - `SECRET_KEY`（必須）
+    - `DATABASE_URL`（PostgreSQL の接続文字列）
+
+### 既存SQLiteデータを移したい場合
+
+1. ローカルDBのバックアップを作成
+2. 一度CSV経由で移行するか、移行スクリプトで PostgreSQL へ投入
+3. 移行後に `DATABASE_URL` を PostgreSQL に切り替えて再デプロイ
+
+## 共有運用の注意
+
+- 誰でも開けるURLだと編集できてしまうため、将来的に認証の追加を推奨
+- DBはGitに含めない（`.gitignore` で除外済み）
 
 ## 今後の拡張案
 
