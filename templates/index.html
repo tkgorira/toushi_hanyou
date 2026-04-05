@@ -84,7 +84,7 @@
 </div>
 
 {% if rows %}
-<div class="table-wrapper">
+<div class="table-wrapper desktop-holdings">
   <table class="holdings-table">
     <thead>
       <tr>
@@ -169,6 +169,40 @@
       {% endfor %}
     </tbody>
   </table>
+</div>
+
+<div class="mobile-holdings">
+  {% for row in rows %}
+  <article class="holding-card">
+    <div class="holding-card-head">
+      <div>
+        <div class="ticker">{{ row.ticker }}</div>
+        <div class="ticker-sub">{{ row.account_type_display }} / {{ row.name }}</div>
+      </div>
+      <a href="{{ url_for('holding_edit', holding_id=row.id) }}" class="btn btn--tiny btn--secondary">編集</a>
+    </div>
+
+    <div class="holding-grid">
+      <div class="holding-item"><span>保有数</span><strong>{{ row.quantity }}</strong></div>
+      <div class="holding-item"><span>通貨</span><strong>{{ row.currency }}</strong></div>
+      <div class="holding-item"><span>現在価格</span><strong>{% if row.price is none %}取得失敗{% else %}{{ row.price_display }}{% endif %}</strong></div>
+      <div class="holding-item"><span>評価額</span><strong>{{ row.market_value_display }}</strong></div>
+      <div class="holding-item"><span>損益額</span><strong class="pnl pnl--{{ row.pnl_sign }}">{{ row.pnl_display }}</strong></div>
+      <div class="holding-item"><span>損益率</span><strong class="pnl pnl--{{ row.pnl_sign }}">{{ row.pnl_pct_display }}</strong></div>
+      <div class="holding-item"><span>年間受取配当/株</span><strong>{{ row.annual_dividend_display }}</strong></div>
+      <div class="holding-item"><span>配当利回り</span><strong>{{ row.div_yield_display }}</strong></div>
+      {% if monthly_goal %}
+      <div class="holding-item"><span>買い増し株数</span><strong class="{% if row.goal_achieved %}text--achieved{% else %}text--shortage{% endif %}">{{ row.shares_to_add_display }}</strong></div>
+      <div class="holding-item"><span>買い増し金額</span><strong>{{ row.buy_amount_to_add_display }}</strong></div>
+      {% endif %}
+    </div>
+
+    <form action="{{ url_for('holding_delete', holding_id=row.id) }}" method="post"
+          onsubmit="return confirm('{{ row.ticker }} を削除しますか？')">
+      <button type="submit" class="btn btn--small btn--danger mobile-delete-btn">削除</button>
+    </form>
+  </article>
+  {% endfor %}
 </div>
 {% else %}
 <div class="empty-state">
